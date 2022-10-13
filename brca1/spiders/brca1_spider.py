@@ -1,6 +1,4 @@
 import scrapy
-import requests
-import json
 from nested_lookup import nested_lookup
 from time import sleep
 
@@ -29,14 +27,10 @@ class Brca1Spider(scrapy.Spider):
         
         print('----------------------------------------------------------')
 
-        print(self.page)
-        print (self.search_list)
-        print (self.search_term)
-        print (self.search_term[0])
-        sleep(3)
-    
+        print(f'Previous page #:{self.page}')
         self.page = self.page + 1
-        print(self.page)
+        print(f'Current page #:{self.page}')
+
         new_url = f'https://brcaexchange.org/backend/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num={self.page}&search_term={self.search_term[0]}&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD&include=Variant_in_ENIGMA_BRCA12_Functional_Assays&include=Variant_in_GnomAD&include=Variant_in_GnomADv3'
         
         HGVS_Nucleotide = nested_lookup(
@@ -75,13 +69,15 @@ class Brca1Spider(scrapy.Spider):
 
         #self.list[:] = (elem[12:] for elem in self.list)
 
-        # print(self.HGVS_Nucleotide_list)
-        # print('~+~+~+~+~+~+~+~+~+~+~')
-        # print(self.HGVS_Protein_list)
-        # print('~+~+~+~+~+~+~+~+~+~+~')
-        # print(self.Protein_Abbrev_list)
-        # print('~+~+~+~+~+~+~+~+~+~+~')
-        # print(self.BIC_des_list)
+        print(f'HGVS cDNA: {self.HGVS_Nucleotide_list}')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print(f'HGVS Protein: {self.HGVS_Protein_list}')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print(f'Protein Abbrev.: {self.Protein_Abbrev_list}')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print(f'BIC Nomenclature: {self.BIC_des_list}')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~')
+        sleep(10)
         yield scrapy.Request(new_url, callback = self.parse, dont_filter = True)
         
         print('----------------------------------------------------------')
