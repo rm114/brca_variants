@@ -74,11 +74,10 @@ class Brca1Spider(scrapy.Spider):
             #not last page, continues on
             else:
 
-                self.test_table['Variant'].append(self.search_term[self.current_search_term])
-
                 for result in json_response["data"]:
                     
                     def table_update():
+                        self.test_table['Variant'].append(self.search_term[self.current_search_term])
                         self.test_table['Protein_Change'].append(result ['Protein_Change'])
                         self.test_table['HGVS_cDNA'].append(result ['HGVS_cDNA'])
                         self.test_table['HGVS_Protein'].append(result ['HGVS_Protein'])
@@ -125,7 +124,8 @@ class Brca1Spider(scrapy.Spider):
                     self.page = self.page + 1
                     print(f'Current page #:{self.page}')
                 else:
-                    None
+                    self.page = 100000000000
+                    print(f'Current page #:{self.page}')
                     
                 new_url = f'https://brcaexchange.org/backend/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num={self.page}&search_term={self.search_term[self.current_search_term]}&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD&include=Variant_in_ENIGMA_BRCA12_Functional_Assays&include=Variant_in_GnomAD&include=Variant_in_GnomADv3'
         
