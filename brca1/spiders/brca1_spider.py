@@ -7,16 +7,19 @@ import re
 #Started 10/13/2022
 #Written in Python 3.10.7
 class Brca1Spider(scrapy.Spider):
-    #To execute: scrapy crawl brca1
-    name = "brca1"
+    #To execute: scrapy crawl variants
+    name = "variants"
     #results page #
     page = 0
    
     gene = input('Input which gene you want to query (BRCA1, BRCA2, or both):')
     search_list = input('Input the variant(s):')
-    search_term = search_list.split()
+    #first, splits by comma
+    search_term = search_list.split(", ")
     #index # of current search term
     current_search_term = 0
+    #then, splits each term by space
+    search_term_2 = search_term[current_search_term].split()
 
     ignore_list = ["variant", "not", "found", "match", "matched", "report", "reported", "NM_007294.2", "NP_009225.1", "p", "brca1", "brca2", "stated", "positive", "dup", "del", "truncation", "intron", "exon", "introns", "exons", "ivs", "intronic", "deletion"]
 
@@ -46,7 +49,7 @@ class Brca1Spider(scrapy.Spider):
         print('----------------------------------------------------------')
 
         print(f'Current search term: {self.search_term[self.current_search_term]}')
-        print(f'Page #: {self.page}')
+        print(f'Results page #: {self.page}')
 
         #checks if current index is within search array
         if self.current_search_term >= len(self.search_term):
@@ -88,12 +91,14 @@ class Brca1Spider(scrapy.Spider):
                     "Variant_id": [],
                     "Variant": [],
                     "Page": [],
+                    "Note": [],
                     "Attempted_matches": []
                 }
-                misc_results_id_table['Variant_id'] = self.current_search_term
+                misc_results_id_table['Variant_id'] = self.current_search_term + 1
                 misc_results_id_table['Variant'] = self.search_term[self.current_search_term]
-                misc_results_id_table['Page'] = self.page
+                misc_results_id_table['Page'] = self.page + 1
                 misc_results_id_table['Attempted_matches'] = json_response['count']
+                misc_results_id_table['Note'] = 'Invalid search term/variant'
                 self.misc_table['Misc_Results'].append(misc_results_id_table)
                 
                 print(f'ERR: Invalid variant parsed: "{self.search_term[self.current_search_term]}", searching for the next variant...')
@@ -139,6 +144,7 @@ class Brca1Spider(scrapy.Spider):
                     "Variant_id": [],
                     "Variant": [],
                     "Page": [],
+                    "Note": [],
                     "Attempted_matches": [],
                     "Gene_query(BRCA1/BRCA2)": [],
                     "Pathogenicity_all": [],
@@ -147,9 +153,10 @@ class Brca1Spider(scrapy.Spider):
                     "HGVS_cDNA": [],
                     "HGVS_Protein": []
                 }
-                no_results_id_table['Variant_id'] = self.current_search_term
+                no_results_id_table['Variant_id'] = self.current_search_term + 1
                 no_results_id_table['Variant'] = self.search_term[self.current_search_term]
-                no_results_id_table['Page'] = self.page
+                no_results_id_table['Page'] = self.page + 1
+                no_results_id_table['Note'] = 'No results for this variant in BRCA Exchange database'
                 no_results_id_table['Gene_query(BRCA1/BRCA2)'] = self.gene
                 no_results_id_table['Attempted_matches'] = json_response['count']
                 self.no_match_table['No_Match_Results'].append(no_results_id_table)
@@ -202,6 +209,7 @@ class Brca1Spider(scrapy.Spider):
                     "Variant_id": [],
                     "Variant": [],
                     "Page": [],
+                    "Note": [],
                     "Gene_query(BRCA1/BRCA2)": [],
                     "Pathogenicity_all": [],
                     "Pathogenicity_expert": [],
@@ -215,6 +223,7 @@ class Brca1Spider(scrapy.Spider):
                     "Variant_id": [],
                     "Variant": [],
                     "Page": [],
+                    "Note": [],
                     "Attempted_matches": [],
                     "Gene_query(BRCA1/BRCA2)": [],
                     "Pathogenicity_all": [],
@@ -304,9 +313,9 @@ class Brca1Spider(scrapy.Spider):
                         BIC_Nomenclature_search = str(BIC_cut_ivs)
 
                         def match_table_update():
-                            match_id_table['Variant_id'] = self.current_search_term
+                            match_id_table['Variant_id'] = self.current_search_term + 1
                             match_id_table['Variant'] = self.search_term[self.current_search_term]
-                            match_id_table['Page'] = self.page
+                            match_id_table['Page'] = self.page + 1
                             match_id_table['Gene_query(BRCA1/BRCA2)'] = self.gene
                             
                             if Protein_Change_search == "-":
@@ -315,15 +324,18 @@ class Brca1Spider(scrapy.Spider):
                                 None
                             else:
                                 match_id_table['Protein_Change'].append(result['Protein_Change'] + "[" + result["Gene_Symbol"] + "]")
+                                match_id_table['Note'] = 'Variant data populated by protein match'
                             
                             if HGVS_cDNA_search == "-":
                                 None
                             else:
+                                match_id_table['Note'] = 'Variant data populated by HGVS cDNA match'
                                 match_id_table['HGVS_cDNA'].append(result['HGVS_cDNA'] + "[" + result["Gene_Symbol"] + "]")
 
                             if "?" in HGVS_Protein_search:
                                 None
                             else:
+                                match_id_table['Note'] = 'Variant data populated by HGVS protein match'
                                 match_id_table['HGVS_Protein'].append(result ['HGVS_Protein'] + "[" + result["Gene_Symbol"] + "]")
 
                             match_id_table['Pathogenicity_all'].append(result ['Pathogenicity_all'] + "[" + result["Gene_Symbol"] + "]")
@@ -331,9 +343,9 @@ class Brca1Spider(scrapy.Spider):
                             
 
                         def no_match_table_update():
-                            no_match_id_table['Variant_id'] = self.current_search_term
+                            no_match_id_table['Variant_id'] = self.current_search_term + 1
                             no_match_id_table['Variant'] = self.search_term[self.current_search_term]
-                            no_match_id_table['Page'] = self.page
+                            no_match_id_table['Page'] = self.page + 1
                             no_match_id_table['Attempted_matches'] = json_response['count']
                             no_match_id_table['Gene_query(BRCA1/BRCA2)'] = self.gene
 
@@ -342,16 +354,19 @@ class Brca1Spider(scrapy.Spider):
                             elif Protein_Change_search == "?":
                                 None
                             else:
+                                no_match_id_table['Note'] = 'No match found for this variant'
                                 no_match_id_table['Protein_Change'].append(result ['Protein_Change'] + "[" + result["Gene_Symbol"] + "]")
                             
                             if HGVS_cDNA_search == "?":
                                 None
                             else:
+                                no_match_id_table['Note'] = 'No match found for this variant'
                                 no_match_id_table['HGVS_cDNA'].append(result ['HGVS_cDNA'] + "[" + result["Gene_Symbol"] + "]")
                             
                             if "?" in HGVS_Protein_search:
                                 None
                             else:
+                                no_match_id_table['Note'] = 'No match found for this variant'
                                 no_match_id_table['HGVS_Protein'].append(result ['HGVS_Protein'] + "[" + result["Gene_Symbol"] + "]")
                             
                             no_match_id_table['Pathogenicity_all'].append(result ['Pathogenicity_all'] + "[" + result["Gene_Symbol"] + "]")
@@ -360,7 +375,7 @@ class Brca1Spider(scrapy.Spider):
                             
                         gene_symbol = str(result["Gene_Symbol"])
                         if gene_symbol.lower() == self.gene.lower() or self.gene.lower() == "both":
-                            if re.search(input_search, Protein_Change_search) is not None:
+                            if re.search(input_search, Protein_Change_search) is not None or re.search(input_search, Protein_Change_search):
                                 self.matched = "YES"
                                 match_table_update()
                                 print('Protein match found!')
