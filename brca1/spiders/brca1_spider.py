@@ -2,6 +2,7 @@ import scrapy
 from time import sleep
 import json
 import re
+from .functions import *
 
 #Syapse variant validation script
 #Started 10/13/2022
@@ -15,11 +16,10 @@ class Brca1Spider(scrapy.Spider):
     gene = input('Input which gene you want to query (BRCA1, BRCA2, or both):')
     search_list = input('Input the variant(s):')
     #first, splits by comma
-    search_term = search_list.split(", ")
+    search_term = search_list.split()
     #index # of current search term
     current_search_term = 0
-    #then, splits each term by space
-    search_term_2 = search_term[current_search_term].split()
+
 
     ignore_list = ["variant", "not", "found", "match", "matched", "report", "reported", "NM_007294.2", "NP_009225.1", "p", "brca1", "brca2", "stated", "positive", "dup", "del", "truncation", "intron", "exon", "introns", "exons", "ivs", "intronic", "deletion"]
 
@@ -29,6 +29,7 @@ class Brca1Spider(scrapy.Spider):
     number_match = 0
     number_no_match = 0
     number_no_results = 0
+    number_excluded = 0
 
     start_urls = [f'https://brcaexchange.org/backend/data/?format=json&order_by=Gene_Symbol&direction=ascending&page_size=20&page_num={page}&search_term={search_term[current_search_term]}&include=Variant_in_ENIGMA&include=Variant_in_ClinVar&include=Variant_in_1000_Genomes&include=Variant_in_ExAC&include=Variant_in_LOVD&include=Variant_in_BIC&include=Variant_in_ESP&include=Variant_in_exLOVD&include=Variant_in_ENIGMA_BRCA12_Functional_Assays&include=Variant_in_GnomAD&include=Variant_in_GnomADv3']
     match_table = {
@@ -78,13 +79,12 @@ class Brca1Spider(scrapy.Spider):
     
         else:
           
-            print(f'Still within array...{self.current_search_term}/{len(self.search_term)}')
+            print(f'Still within array...{self.current_search_term + 1}/{len(self.search_term)}')
                 
             #total number of results for single search term
             print (f'Total result count: {json_response["count"]}')
 
             #if small string (<4) or ignored word or only letters
-            print(len(str(self.search_term[self.current_search_term])))
             if len(str(self.search_term[self.current_search_term])) < 4  or self.search_term[self.current_search_term].lower() in self.ignore_list or re.search('[a-zA-Z]', self.search_term[self.current_search_term]) == None:
                 misc_results_id_table = {
 
@@ -100,6 +100,7 @@ class Brca1Spider(scrapy.Spider):
                 misc_results_id_table['Attempted_matches'] = json_response['count']
                 misc_results_id_table['Note'] = 'Invalid search term/variant'
                 self.misc_table['Misc_Results'].append(misc_results_id_table)
+                self.number_excluded = self.number_excluded + 1
                 
                 print(f'ERR: Invalid variant parsed: "{self.search_term[self.current_search_term]}", searching for the next variant...')
 
@@ -189,7 +190,7 @@ class Brca1Spider(scrapy.Spider):
                     jsonFile.close()
                     print('JSON Misc Table saved!')
 
-                    print(f'Variants matched: {self.number_match}, variants not matched: {self.number_no_match}, variants no results: {self.number_no_results}')
+                    print(f'Variants matched: {self.number_match}, variants not matched: {self.number_no_match}, variants not in the database: {self.number_no_results}, variants excluded: {self.number_excluded}')
                     print(f'Total variants searched: {(self.number_match + self.number_no_match + self.number_no_results)}')
 
                     print('----------------------------------------------------------')
@@ -234,52 +235,6 @@ class Brca1Spider(scrapy.Spider):
                 }
 
                 for result in json_response["data"]:
-    
-                        def remove_parenthesis (i):
-                            start = i.find("(")
-                            end = i.find(")")
-                            if start != -1 and end != -1:
-                                i = i[start+1:end]
-                                return (i)
-                            elif start == -1 and end != -1:
-                                i = i[:end]
-                                return (i)
-                            elif start != -1 and end == -1:
-                                i = i[start+1:]
-                                return (i)
-                            else:
-                                return (i)
-                        def remove_p(i):
-                            if "p." in i:
-                                i = i.replace("p.", "")
-                                return(i)
-                            else:
-                                return (i)
-                        def remove_c(i):
-                            if "c." in i:
-                                i = i.replace("c.", "")
-                                return (i)
-                            else:
-                                return (i)
-
-                        def remove_ast(i):
-                            if "*" in i:
-                                i = i.replace("*", "ter")
-                                return(i)
-                            else:
-                                return(i)
-                        def remove_x(i):
-                            if "x" in i:
-                                i = i.replace("x", "*")
-                                return(i)
-                            else:
-                                return(i)
-                        def remove_ivs(i):
-                            if "ivs" in i:
-                                i = i.replace("ivs", "")
-                                return(i)
-                            else:
-                                return(i)
 
                         i = str(self.search_term[self.current_search_term].lower())
                         cut_parenth_i = remove_parenthesis(i)
