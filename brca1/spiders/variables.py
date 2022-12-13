@@ -1,0 +1,1 @@
+ignore_list = ["variant", "not", "found", "match", "matched", "report", "reported", "NM_007294.2", "NP_009225.1", "p", "brca1", "brca2", "stated", "positive", "dup", "del", "truncation", "intron", "exon", "introns", "exons", "ivs", "intronic", "deletion"]

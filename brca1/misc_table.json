@@ -1,0 +1,18 @@
+{
+    "Misc_Results": [
+        {
+            "Variant_id": 1,
+            "Variant": "Variant",
+            "Page": 1,
+            "Note": "Invalid search term/variant",
+            "Attempted_matches": 0
+        },
+        {
+            "Variant_id": 1,
+            "Variant": "Variant",
+            "Page": 1,
+            "Note": "Invalid search term/variant",
+            "Attempted_matches": 0
+        }
+    ]
+}

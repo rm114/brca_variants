@@ -1,3 +1,5 @@
+import json
+
 def remove_parenthesis (i):
     start = i.find("(")
     end = i.find(")")
@@ -43,3 +45,27 @@ def remove_ivs(i):
         return(i)
     else:
         return(i)
+        
+def output_match_table(i):
+                
+    jsonFile = open("match_table.json", "w")
+    jsonFile.write(json.dumps(i, indent=4))
+    jsonFile.close()
+    print('JSON Match Table saved!')
+    return(i)
+
+def output_no_match_table(i):
+
+    jsonFile = open("no_match_table.json", "w")
+    jsonFile.write(json.dumps(i, indent=4))
+    jsonFile.close()
+    print('JSON No Match Table saved!')
+    return(i)
+
+def output_misc_table(i):
+
+    jsonFile = open("misc_table.json", "w")
+    jsonFile.write(json.dumps(i, indent=4))
+    jsonFile.close()
+    print('JSON Misc Table saved!')
+    return(i)
